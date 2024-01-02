@@ -59,13 +59,13 @@ class Exp_Informer(Exp_Basic):
 
     def _get_data(self, flag):
         args = self.args
-
+#构建了一个字典
         data_dict = {
             'ETTh1':Dataset_ETT_hour,
             'ETTh2':Dataset_ETT_hour,
             'ETTm1':Dataset_ETT_minute,
             'ETTm2':Dataset_ETT_minute,
-            'WTH':Dataset_Custom,
+            'WTH':Dataset_Custom,   #自定义，可以ctrl点进去查，取数据的
             'ECL':Dataset_Custom,
             'Solar':Dataset_Custom,
             'custom':Dataset_Custom,
@@ -73,13 +73,13 @@ class Exp_Informer(Exp_Basic):
         Data = data_dict[self.args.data]
         timeenc = 0 if args.embed!='timeF' else 1
 
-        if flag == 'test':
+        if flag == 'test':  #训练是跳过
             shuffle_flag = False; drop_last = True; batch_size = args.batch_size; freq=args.freq
-        elif flag=='pred':
+        elif flag=='pred':  #预测是跳过
             shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
             Data = Dataset_Pred
-        else:
-            shuffle_flag = True; drop_last = True; batch_size = args.batch_size; freq=args.freq
+        else:   #训练用
+            shuffle_flag = True; drop_last = True; batch_size = args.batch_size; freq=args.freq  #drop_last
         data_set = Data(
             root_path=args.root_path,
             data_path=args.data_path,
