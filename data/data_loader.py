@@ -196,7 +196,7 @@ class Dataset_Custom(Dataset):
             self.label_len = 24*4
             self.pred_len = 24*4
         else:
-            self.seq_len = size[0]
+            self.seq_len = size[0]     #debug时问什么会读入encoder和decoder的序列长度？
             self.label_len = size[1]
             self.pred_len = size[2]
         # init
@@ -216,7 +216,7 @@ class Dataset_Custom(Dataset):
         self.__read_data__()
 
     def __read_data__(self):
-        self.scaler = StandardScaler()
+        self.scaler = StandardScaler()    #数据标准化
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
         '''
@@ -227,26 +227,29 @@ class Dataset_Custom(Dataset):
             cols=self.cols.copy()
             cols.remove(self.target)
         else:
-            cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')
-        df_raw = df_raw[['date']+cols+[self.target]]
+            # cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')   #列名
+            cols = list(df_raw.columns);  #列名
+            cols.remove(self.target);     #去掉标签，不是特征
+            cols.remove('date')           #时间，不是特征
+        df_raw = df_raw[['date']+cols+[self.target]]    #为啥又把数据聚合起来？重复操作？可以单独看看
 
-        num_train = int(len(df_raw)*0.7)
-        num_test = int(len(df_raw)*0.2)
-        num_vali = len(df_raw) - num_train - num_test
-        border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]
-        border2s = [num_train, num_train+num_vali, len(df_raw)]
-        border1 = border1s[self.set_type]
-        border2 = border2s[self.set_type]
+        num_train = int(len(df_raw)*0.7)   #划分训练集
+        num_test = int(len(df_raw)*0.2)    #划分测试集
+        num_vali = len(df_raw) - num_train - num_test     #划分验证集
+        border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]    #取的是一个数列，所以要减去序列长度
+        border2s = [num_train, num_train+num_vali, len(df_raw)]    #不考虑序列长度的划分
+        border1 = border1s[self.set_type]    #set.type可以追回到type_map
+        border2 = border2s[self.set_type]    #border1和
         
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
-            df_data = df_raw[cols_data]
+            df_data = df_raw[cols_data]       #取数据
         elif self.features=='S':
             df_data = df_raw[[self.target]]
 
         if self.scale:
-            train_data = df_data[border1s[0]:border2s[0]]
-            self.scaler.fit(train_data.values)
+            train_data = df_data[border1s[0]:border2s[0]]   
+            self.scaler.fit(train_data.values)     #算均值和方差，但不输出，用在下一步
             data = self.scaler.transform(df_data.values)
         else:
             data = df_data.values
