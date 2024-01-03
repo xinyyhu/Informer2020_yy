@@ -238,8 +238,8 @@ class Dataset_Custom(Dataset):
         num_vali = len(df_raw) - num_train - num_test     #划分验证集
         border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]    #取的是一个数列，所以要减去序列长度
         border2s = [num_train, num_train+num_vali, len(df_raw)]    #不考虑序列长度的划分
-        border1 = border1s[self.set_type]    #set.type可以追回到type_map
-        border2 = border2s[self.set_type]    #border1和
+        border1 = border1s[self.set_type]    #set.type可以追回到type_map，指定对应数据集的起始边界，比如训练集
+        border2 = border2s[self.set_type]    #所选择的数据集的终止边界
         
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
@@ -254,8 +254,8 @@ class Dataset_Custom(Dataset):
         else:
             data = df_data.values
             
-        df_stamp = df_raw[['date']][border1:border2]
-        df_stamp['date'] = pd.to_datetime(df_stamp.date)
+        df_stamp = df_raw[['date']][border1:border2]     #时间戳
+        df_stamp['date'] = pd.to_datetime(df_stamp.date)    #转换成pandas格式
         data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
 
         self.data_x = data[border1:border2]
