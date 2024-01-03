@@ -127,19 +127,19 @@ class Exp_Informer(Exp_Basic):
         vali_data, vali_loader = self._get_data(flag = 'val')
         test_data, test_loader = self._get_data(flag = 'test')
 
-        path = os.path.join(self.args.checkpoints, setting)
+        path = os.path.join(self.args.checkpoints, setting)   #判断路径，如果没有新建路径
         if not os.path.exists(path):
             os.makedirs(path)
 
-        time_now = time.time()
+        time_now = time.time()    #每个epoch的执行时间
         
-        train_steps = len(train_loader)
+        train_steps = len(train_loader)    #执行多少个steps，patch多大
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
         
-        model_optim = self._select_optimizer()
-        criterion =  self._select_criterion()
+        model_optim = self._select_optimizer()    #优化器
+        criterion =  self._select_criterion()     #损失函数
 
-        if self.args.use_amp:
+        if self.args.use_amp:   #win没加
             scaler = torch.cuda.amp.GradScaler()
 
         for epoch in range(self.args.train_epochs):
@@ -148,10 +148,10 @@ class Exp_Informer(Exp_Basic):
             
             self.model.train()
             epoch_time = time.time()
-            for i, (batch_x,batch_y,batch_x_mark,batch_y_mark) in enumerate(train_loader):
+            for i, (batch_x,batch_y,batch_x_mark,batch_y_mark) in enumerate(train_loader):   #为啥会跳到__getitem__？执行batch次？batch32，数据96行，特征4
                 iter_count += 1
                 
-                model_optim.zero_grad()
+                model_optim.zero_grad()    #梯度清零
                 pred, true = self._process_one_batch(
                     train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
                 loss = criterion(pred, true)
@@ -265,10 +265,10 @@ class Exp_Informer(Exp_Basic):
 
         # decoder input
         if self.args.padding==0:
-            dec_inp = torch.zeros([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
+            dec_inp = torch.zeros([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()    #初始化decoder inputs，用0
         elif self.args.padding==1:
             dec_inp = torch.ones([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
-        dec_inp = torch.cat([batch_y[:,:self.args.label_len,:], dec_inp], dim=1).float().to(self.device)
+        dec_inp = torch.cat([batch_y[:,:self.args.label_len,:], dec_inp], dim=1).float().to(self.device)  #沿序列长度dim=1拼接，前48个位原batch_y值，后24为0，掩码操作
         # encoder - decoder
         if self.args.use_amp:
             with torch.cuda.amp.autocast():
@@ -280,7 +280,7 @@ class Exp_Informer(Exp_Basic):
             if self.args.output_attention:
                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
             else:
-                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)  #encoder特征和其时间特征、decoder特征和其时间特征，但是model跳到了basic文件里
         if self.args.inverse:
             outputs = dataset_object.inverse_transform(outputs)
         f_dim = -1 if self.args.features=='MS' else 0

@@ -258,25 +258,25 @@ class Dataset_Custom(Dataset):
         df_stamp['date'] = pd.to_datetime(df_stamp.date)    #转换成pandas格式
         data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
 
-        self.data_x = data[border1:border2]
+        self.data_x = data[border1:border2]    #处理后的训练集数据
         if self.inverse:
             self.data_y = df_data.values[border1:border2]
         else:
             self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
     
-    def __getitem__(self, index):
-        s_begin = index
-        s_end = s_begin + self.seq_len
-        r_begin = s_end - self.label_len 
+    def __getitem__(self, index):    #dataloader需要的，index是随机传进来的索引
+        s_begin = index      #索引即其实位置
+        s_end = s_begin + self.seq_len    #终止位置
+        r_begin = s_end - self.label_len     #得到输入decoder的起始位置
         r_end = r_begin + self.label_len + self.pred_len
 
-        seq_x = self.data_x[s_begin:s_end]
-        if self.inverse:
+        seq_x = self.data_x[s_begin:s_end]    #读入从index开始的96个数
+        if self.inverse:     #没有反转
             seq_y = np.concatenate([self.data_x[r_begin:r_begin+self.label_len], self.data_y[r_begin+self.label_len:r_end]], 0)
         else:
-            seq_y = self.data_y[r_begin:r_end]
-        seq_x_mark = self.data_stamp[s_begin:s_end]
+            seq_y = self.data_y[r_begin:r_end]   #输出的序列，48+24行
+        seq_x_mark = self.data_stamp[s_begin:s_end]   #时间特征
         seq_y_mark = self.data_stamp[r_begin:r_end]
 
         return seq_x, seq_y, seq_x_mark, seq_y_mark
