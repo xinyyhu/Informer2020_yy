@@ -79,7 +79,7 @@ class Exp_Informer(Exp_Basic):
             shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
             Data = Dataset_Pred
         else:   #训练用
-            shuffle_flag = True; drop_last = True; batch_size = args.batch_size; freq=args.freq  #drop_last
+            shuffle_flag = True; drop_last = True; batch_size = args.batch_size; freq=args.freq  #shuffle是一段一段的取；drop_last
         data_set = Data(
             root_path=args.root_path,
             data_path=args.data_path,

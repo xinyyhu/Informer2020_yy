@@ -28,7 +28,7 @@ class MinuteOfHour(TimeFeature):
 class HourOfDay(TimeFeature):
     """Hour of day encoded as value between [-0.5, 0.5]"""
     def __call__(self, index: pd.DatetimeIndex) -> np.ndarray:
-        return index.hour / 23.0 - 0.5
+        return index.hour / 23.0 - 0.5    #压缩小时到[-0.5,0.5]范围
 
 class DayOfWeek(TimeFeature):
     """Hour of day encoded as value between [-0.5, 0.5]"""

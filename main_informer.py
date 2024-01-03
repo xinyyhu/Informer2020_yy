@@ -1,5 +1,6 @@
 import argparse
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 import torch
 
 from exp.exp_informer import Exp_Informer
@@ -164,7 +165,7 @@ args.freq = args.freq[-1:]
 print('Args in experiment:')
 print(args)
 
-#用Exp_Informer取数据 阿萨德
+#用Exp_Informer取数据 
 Exp = Exp_Informer
 
 for ii in range(args.itr):
