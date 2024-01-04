@@ -22,12 +22,12 @@ class DecoderLayer(nn.Module):
             x, x, x,
             attn_mask=x_mask
         )[0])
-        x = self.norm1(x)
+        x = self.norm1(x)                                       #self-attention
 
         x = x + self.dropout(self.cross_attention(
-            x, cross, cross,
+            x, cross, cross,          #x是decoder输入，是72；cross是encoder输出，是48
             attn_mask=cross_mask
-        )[0])
+        )[0])                                                   #cross-attention
 
         y = x = self.norm2(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1,1))))

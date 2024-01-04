@@ -41,11 +41,11 @@ class EncoderLayer(nn.Module):
         #     x, x, x,
         #     attn_mask = attn_mask
         # ))
-        new_x, attn = self.attention(
+        new_x, attn = self.attention(                #attention直接ctrl不到，搜不在这个文件
             x, x, x,
             attn_mask = attn_mask
-        )
-        x = x + self.dropout(new_x)
+        )                                         #QKV
+        x = x + self.dropout(new_x)     #残差
 
         y = x = self.norm1(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1,1))))
@@ -65,8 +65,8 @@ class Encoder(nn.Module):
         attns = []
         if self.conv_layers is not None:
             for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
-                x, attn = attn_layer(x, attn_mask=attn_mask)
-                x = conv_layer(x)
+                x, attn = attn_layer(x, attn_mask=attn_mask)     #跳到了encoderlayer
+                x = conv_layer(x)     #maxpooling
                 attns.append(attn)
             x, attn = self.attn_layers[-1](x, attn_mask=attn_mask)
             attns.append(attn)
