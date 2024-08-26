@@ -196,7 +196,7 @@ class Dataset_Custom(Dataset):
             self.label_len = 24*4
             self.pred_len = 24*4
         else:
-            self.seq_len = size[0]     #debug时问什么会读入encoder和decoder的序列长度？
+            self.seq_len = size[0]     #debug时问什么会读入encoder和decoder的序列长度？传入的
             self.label_len = size[1]
             self.pred_len = size[2]
         # init
@@ -229,17 +229,28 @@ class Dataset_Custom(Dataset):
         else:
             # cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')   #列名
             cols = list(df_raw.columns);  #列名
+            print(cols)
             cols.remove(self.target);     #去掉标签，不是特征
+            print(cols)
             cols.remove('date')           #时间，不是特征
+            print(cols)
+            
         df_raw = df_raw[['date']+cols+[self.target]]    #为啥又把数据聚合起来？重复操作？可以单独看看
-
+        print(['date']+cols+[self.target])
+        
         num_train = int(len(df_raw)*0.7)   #划分训练集
+        print(len(df_raw)*0.7)
+        print(int(len(df_raw)*0.7))
         num_test = int(len(df_raw)*0.2)    #划分测试集
+        print(int(len(df_raw)*0.2))
         num_vali = len(df_raw) - num_train - num_test     #划分验证集
-        border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]    #取的是一个数列，所以要减去序列长度
+        print(len(df_raw)-num_train-num_test)
+        border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]    #取的是一个数列，所以要减去序列长度，也可以用num_train+num_vali-self.seq_len
         border2s = [num_train, num_train+num_vali, len(df_raw)]    #不考虑序列长度的划分
+        print(border1s, border2s)
         border1 = border1s[self.set_type]    #set.type可以追回到type_map，指定对应数据集的起始边界，比如训练集
         border2 = border2s[self.set_type]    #所选择的数据集的终止边界
+        print(border1,border2)
         
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
@@ -248,7 +259,9 @@ class Dataset_Custom(Dataset):
             df_data = df_raw[[self.target]]
 
         if self.scale:
-            train_data = df_data[border1s[0]:border2s[0]]   
+            train_data = df_data[border1s[0]:border2s[0]] 
+            print(border1s[0]) 
+            print(border2s[0]) 
             self.scaler.fit(train_data.values)     #算均值和方差，但不输出，用在下一步
             data = self.scaler.transform(df_data.values)
         else:
@@ -256,27 +269,28 @@ class Dataset_Custom(Dataset):
             
         df_stamp = df_raw[['date']][border1:border2]     #时间戳
         df_stamp['date'] = pd.to_datetime(df_stamp.date)    #转换成pandas格式
+        print(df_stamp)
         data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
 
-        self.data_x = data[border1:border2]
+        self.data_x = data[border1:border2]    #处理后的训练集数据
         if self.inverse:
             self.data_y = df_data.values[border1:border2]
         else:
             self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
     
-    def __getitem__(self, index):
-        s_begin = index
-        s_end = s_begin + self.seq_len
-        r_begin = s_end - self.label_len 
+    def __getitem__(self, index):    #dataloader需要的，index是随机传进来的索引
+        s_begin = index      #索引即其实位置
+        s_end = s_begin + self.seq_len    #终止位置
+        r_begin = s_end - self.label_len     #得到输入decoder的起始位置
         r_end = r_begin + self.label_len + self.pred_len
 
-        seq_x = self.data_x[s_begin:s_end]
-        if self.inverse:
+        seq_x = self.data_x[s_begin:s_end]    #读入从index开始的96个数
+        if self.inverse:     #没有反转
             seq_y = np.concatenate([self.data_x[r_begin:r_begin+self.label_len], self.data_y[r_begin+self.label_len:r_end]], 0)
         else:
-            seq_y = self.data_y[r_begin:r_end]
-        seq_x_mark = self.data_stamp[s_begin:s_end]
+            seq_y = self.data_y[r_begin:r_end]   #输出的序列，48+24行
+        seq_x_mark = self.data_stamp[s_begin:s_end]   #时间特征
         seq_y_mark = self.data_stamp[r_begin:r_end]
 
         return seq_x, seq_y, seq_x_mark, seq_y_mark

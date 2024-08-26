@@ -43,7 +43,7 @@ parser.add_argument('--label_len', type=int, default=48, help='start token lengt
 parser.add_argument('--pred_len', type=int, default=24, help='prediction sequence length')
 # Informer decoder input: concat[start token series(label_len), zero padding series(pred_len)]
 
-#编码器解码器输入输出维度
+#编码器解码器输入维度
 parser.add_argument('--enc_in', type=int, default=12, help='encoder input size')
 parser.add_argument('--dec_in', type=int, default=12, help='decoder input size')
 
@@ -93,7 +93,7 @@ parser.add_argument('--output_attention', action='store_true', help='whether to 
 #预测
 parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
 
-#informer框架里没有
+#这个是啥
 parser.add_argument('--mix', action='store_false', help='use mix attention in generative decoder', default=True)
 
 #读数据
@@ -153,12 +153,18 @@ data_parser = {
     'Solar':{'data':'solar_AL.csv','T':'POWER_136','M':[137,137,137],'S':[1,1,1],'MS':[137,137,1]},
 }
 if args.data in data_parser.keys():
+    print(args.data)
     data_info = data_parser[args.data]
+    print(data_info)
     args.data_path = data_info['data']
     args.target = data_info['T']
     args.enc_in, args.dec_in, args.c_out = data_info[args.features]
+    print(args.features)
+    print(data_info[args.features])
+    
 
 args.s_layers = [int(s_l) for s_l in args.s_layers.replace(' ','').split(',')]
+print(args.s_layers)
 args.detail_freq = args.freq
 args.freq = args.freq[-1:]
 

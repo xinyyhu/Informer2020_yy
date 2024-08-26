@@ -24,7 +24,7 @@ class Informer(nn.Module):
         self.dec_embedding = DataEmbedding(dec_in, d_model, embed, freq, dropout)
         # Attention
         Attn = ProbAttention if attn=='prob' else FullAttention
-        # Encoder
+        # Encoder，在初始化的时候就配置好必要的子模块
         self.encoder = Encoder(
             [
                 EncoderLayer(
@@ -65,9 +65,9 @@ class Informer(nn.Module):
         self.projection = nn.Linear(d_model, c_out, bias=True)
         
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, 
-                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
+                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):    #为啥exp_informer的
+        enc_out = self.enc_embedding(x_enc, x_mark_enc)    #trans的第一步是做embedding，对于时序可以是FC，这里是1D卷积，它这里是卷积
+        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)   #这个算法里不考虑mask
 
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)

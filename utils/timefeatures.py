@@ -90,6 +90,7 @@ def time_features_from_frequency_str(freq_str: str) -> List[TimeFeature]:
     }
 
     offset = to_offset(freq_str)
+    print(offset)
 
     for offset_type, feature_classes in features_by_offsets.items():
         if isinstance(offset, offset_type):
