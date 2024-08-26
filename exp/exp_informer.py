@@ -154,8 +154,8 @@ class Exp_Informer(Exp_Basic):
                 
                 model_optim.zero_grad()    #梯度清零
                 pred, true = self._process_one_batch(
-                    train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
-                loss = criterion(pred, true)
+                    train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)    #跳到exp
+                loss = criterion(pred, true)     #算loss
                 train_loss.append(loss.item())
                 
                 if (i+1) % 100==0:
@@ -171,7 +171,7 @@ class Exp_Informer(Exp_Basic):
                     scaler.step(model_optim)
                     scaler.update()
                 else:
-                    loss.backward()
+                    loss.backward()        #反向传播
                     model_optim.step()
 
             print("Epoch: {} cost time: {}".format(epoch+1, time.time()-epoch_time))
@@ -281,7 +281,7 @@ class Exp_Informer(Exp_Basic):
             if self.args.output_attention:
                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
             else:
-                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)  #encoder特征和其时间特征、decoder特征和其时间特征，但是model跳到了basic文件里
+                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)  #encoder特征和其时间特征、decoder特征和其时间特征，但是model跳到了basic文件里  #输出的decoder output的24
         if self.args.inverse:
             outputs = dataset_object.inverse_transform(outputs)
         f_dim = -1 if self.args.features=='MS' else 0
