@@ -65,15 +65,9 @@ class Informer(nn.Module):
         self.projection = nn.Linear(d_model, c_out, bias=True)
         
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, 
-<<<<<<< HEAD
-                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):    #为啥exp_informer的
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)    #trans的第一步是做embedding，对于时序可以是FC，这里是1D卷积，它这里是卷积
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)   #这个算法里不考虑mask
-=======
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):    #为啥exp_informer的        
         enc_out = self.enc_embedding(x_enc, x_mark_enc)    #trans的第一步是做embedding，对于时序可以是FC，这里是1D卷积
         enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)   #这个算法里不考虑mask，这步执行完就完成了encoder
->>>>>>> 37087d359d1f186c94cfdcbf68bc44a79ef24196
 
         dec_out = self.dec_embedding(x_dec, x_mark_dec)     #embedding与encoder一样
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)   #得到decoder，72

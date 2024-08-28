@@ -50,18 +50,10 @@ class ProbAttention(nn.Module):
         _, _, L_Q, _ = Q.shape
 
         # calculate the sampled Q_K
-<<<<<<< HEAD
-        K_expand = K.unsqueeze(-3).expand(B, H, L_Q, L_K, E)   # 扩充了-3的维度，在H之后
-        print(K_expand.shape)
-        index_sample = torch.randint(L_K, (L_Q, sample_k)) # real U = U_part(factor*ln(L_k))*L_q
-        K_sample = K_expand[:, :, torch.arange(L_Q).unsqueeze(1), index_sample, :]    # 采样了K，数量减小到25
-        Q_K_sample = torch.matmul(Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze(-2)
-=======
         K_expand = K.unsqueeze(-3).expand(B, H, L_Q, L_K, E)     #扩充K的维度
         index_sample = torch.randint(L_K, (L_Q, sample_k)) # real U = U_part(factor*ln(L_k))*L_q    #randint(low, high size),这里是high，即上限，在96个数中生成size个随机数，96*25矩阵
         K_sample = K_expand[:, :, torch.arange(L_Q).unsqueeze(1), index_sample, :]    #对k做采用
         Q_K_sample = torch.matmul(Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze(-2)    #没看懂
->>>>>>> 37087d359d1f186c94cfdcbf68bc44a79ef24196
 
         # find the Top_k query with sparisty measurement
         M = Q_K_sample.max(-1)[0] - torch.div(Q_K_sample.sum(-1), L_K)    #求M，对应论文排序那个公式，也没看懂

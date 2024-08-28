@@ -239,6 +239,7 @@ class Dataset_Custom(Dataset):
         print(['date']+cols+[self.target])
         
         num_train = int(len(df_raw)*0.7)   #划分训练集
+        print(len(df_raw))
         print(len(df_raw)*0.7)
         print(int(len(df_raw)*0.7))
         num_test = int(len(df_raw)*0.2)    #划分测试集
